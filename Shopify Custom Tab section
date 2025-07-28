@@ -1,4 +1,301 @@
-https://www.youtube.com/watch?v=6f6ZZR1Cm2g&list=PLPPYpP057-pE57ka1LExOThvpF0mIK5if&index=5
+Method 1:
+=========
+<div id="shopify-section-{{ section.id }}" class="shopify-section">
+  <div class="featured-products" data-featured-products="">
+    <div class="container">
+      <h2 class="featured-products__heading text-center display display-5" style="--title-color:#1C1C1E">
+       {{ section.settings.heading }}
+      </h2>
+      <ul class="featured-products__list">
+        {%- for block in section.blocks -%}
+          <li class="tab-button{% if forloop.first %} featured-products__item--active {% endif %} featured-products__item">
+            <button
+              class="featured-products__btn subheading-1 subheading-1--bold"
+              data-tab="{{ forloop.index0 }}"
+            >
+              {{ block.settings.collection_heading | default: block.settings.collection.title -}}
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <div class="featured-products__swipers">
+        {% for block in section.blocks %}
+          {% assign collection = block.settings.collection %}
+
+          <div
+            class="tab-content{% if forloop.first %} featured-products__item--active {% endif %} swiper collection-tab featured-products__swiper  swiper-initialized swiper-horizontal swiper-backface-hidden"
+            data-tab="{{ forloop.index0 }}"
+          >
+            <div
+              class="swiper-wrapper"
+            >
+              {% for cardProduct in collection.products %}
+                <div class="swiper-slide" style="margin-right: 16px;" data-swiper-slide-index="2">
+                  <div class="product-card">
+                    <div class="product-card__image-info-wrapper">
+                      <ul class="product-stickers product-stickers--overlay">
+                        <li
+                          class="product-stickers__sticker subheading subheading-2--bold subheading-2 text-center"
+                          style="--color: #124f2c;"
+                        ></li>
+                      </ul>
+
+                      <span
+                        class="wishlist-btn smartwishlist unbookmarked"
+                        data-product-handle="{{ cardProduct.handle }}"
+                        title="Add to Wishlist"
+                        aria-label="Add to Wishlist"
+                        role="button"
+                        tabindex="0"
+                      >
+                        <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18.9418 2.5707C16.7232 0.352063 13.1269 0.79551 10.9087 3.01368C8.69006 0.79551 5.09373 0.352063 2.87556 2.57024C0.656918 4.78888 0.656918 8.3852 2.87556 10.6038L10.9087 18.637L13.2183 16.3274L18.9418 10.6038C21.1605 8.3852 21.1605 4.78888 18.9418 2.5707Z" stroke="currentColor" stroke-width="1.25003" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
+
+                      <div class="product-card__image-info" data-image-info-container="">
+                        <div class="product-card__image-wrapper">
+                          <div class="product-card__hover-gallery">
+                            <div class="swiper-slide swiper-slide-active">
+                              <a href="{{ cardProduct.url | within:collection }}" aria-label="product-image">
+                                <div class="image-snippet image-snippet--is-single">
+                                  <img
+                                    class="image-snippet__img product-card__img"
+                                    width="310"
+                                    height="387"
+                                    src="{{ cardProduct.featured_image | img_url: '310x387' }}"
+                                    loading="lazy"
+                                    sizes="(min-width: 768px) 50vw, (min-width: 1024px) 25vw, 100vw"
+
+                                    alt="{{ cardProduct.title }}"
+                                  >
+                                </div>
+                              </a>
+                            </div>
+
+                            <button aria-label="Previous Slide" class="swiper-button swiper-button-prev">
+                              <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M11.4375 18.75L4.6875 12L11.4375 5.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M5.625 12H19.3125" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
+                              </svg>
+                            </button>
+                            <button aria-label="Next Slide" class="swiper-button swiper-button-next">
+                              <svg
+                                width="25"
+                                height="24"
+                                viewBox="0 0 25 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M13.0625 5.25L19.8125 12L13.0625 18.75" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M18.875 12H5.1875" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
+                              </svg>
+                            </button>
+                          </div>
+
+                          <ul class="product-card__variant-options-list">
+                            {% assign size_options = cardProduct.options_with_values | where: 'name', 'Taille' %}
+
+                            {% for size_value in size_options[0].values %}
+                              {% assign matching_variant = null %}
+
+                              {% for variant in cardProduct.variants %}
+                                {% for option_index in (0..cardProduct.options.size) %}
+                                  {% assign option_name = cardProduct.options[option_index] %}
+                                  {% if option_name == 'Taille' and variant.options[option_index] == size_value %}
+                                    {% assign matching_variant = variant %}
+                                    {% break %}
+                                  {% endif %}
+                                {% endfor %}
+                                {% if matching_variant %}
+                                  {% break %}
+                                {% endif %}
+                              {% endfor %}
+
+                              {% if matching_variant %}
+                                <li>
+                                  <button
+                                    class="paragraph paragraph--md product-card__variant-option {% unless matching_variant.available %}unavailable {% endunless %}"
+                                    data-size="{{ size_value | escape }}"
+                                    data-variant-id="{{ matching_variant.id }}"
+                                  >
+                                    {{ size_value }}
+                                  </button>
+                                </li>
+                              {% endif %}
+                            {% endfor %}
+                          </ul>
+                        </div>
+                        <div class="product-card__info">
+                          <p class="product-card__name paragraph paragraph--md paragraph--bold" data-aid="product-card">
+                            <a href="{{ cardProduct.url | within:collection }}" title="{{ cardProduct.title }}">
+                              {{- cardProduct.title -}}
+                            </a>
+                          </p>
+                          <div class="product-card__meta">
+                            <div class="product-card__price paragraph paragraph--md">
+                              <div class="product-price-snippet">
+                                <p>   {{- cardProduct.price | money -}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="product-card__swatches-wrapper text-center">
+                      <p class="product-card__swatch-count-text subheading-2">
+                        {% assign color_option = null %}
+
+                        {% for option in cardProduct.options_with_values %}
+                          {% if option.name == 'Couleur' %}
+                            {% assign color_option = option %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
+
+                        {% if color_option %}
+                          {% assign color_count = color_option.values | uniq | size %}
+
+                          {{ color_count }} Couleur{% if color_count > 1 %}s{% endif %}
+                        {% endif %}
+                      </p>
+
+                      <ul class="product-swatches product-swatches--card"></ul>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.collection-tab', {
+      loop: true,
+      slidesPerView: 1.5,
+      spaceBetween: 16,
+      freeMode: true,
+      slidesOffsetBefore: 16,
+      breakpoints: {
+        768: {
+          slidesPerView: 3,
+          spaceBetween: 32,
+          slidesOffsetBefore: 0
+        },
+        1024: {
+          slidesPerView: 4,
+          spaceBetween: 40,
+          freeMode: false,
+          slidesOffsetBefore: 0
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabButtons.forEach((button, i) => {
+      button.addEventListener("click", () => {
+        tabButtons.forEach(btn => btn.classList.remove("featured-products__item--active"));
+        tabContents.forEach(content => content.classList.remove("featured-products__item--active"));
+
+        button.classList.add("featured-products__item--active");
+        tabContents[i].classList.add("featured-products__item--active");
+      });
+    });
+  });
+</script>
+
+<style>
+   .tab-content {
+    display: none!important;
+  }
+   .tab-content.featured-products__item--active {
+    display: block!important;
+  }
+
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.collection_tab.name",
+  "class": "section-featured-collection collections-tab-section",
+  "max_blocks":4,
+  "tag": "section",
+  "disabled_on": {
+   "groups": ["header", "footer","aside"]
+  },
+  "settings": [
+  {
+    "type": "text",
+    "id": "heading",
+    "label": "Heading",
+    "default": "Fashion shows"
+  }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "t:sections.collection_tab.blocks.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "collection_heading",
+          "label": "t:common.global.heading.label"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "t:common.global.collection.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.collection_tab.presets.name",
+      "blocks": [
+        {
+            "type": "collection"
+        },
+        {
+            "type": "collection"
+        },
+        {
+            "type": "collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+
+
+Method: 2
+========
+
+
 <div class="tab-section">
     <div class="page-width">
         <div class="section-header text-center">
